@@ -1,89 +1,191 @@
-<script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const contenedor = document.getElementById("lista-productos");
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Tenis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Poppins', sans-serif;
+    }
 
-    // Margen de ganancia sugerido según tipo de tenis
-    const MARGEN_PRODUCTO = (title) => {
-      const t = title.toLowerCase();
-      if (t.includes("premium") || t.includes("retro") || t.includes("limited")) return 0.50;
-      if (t.includes("air") || t.includes("max") || t.includes("force")) return 0.40;
-      return 0.35;
-    };
+    header {
+      background: linear-gradient(90deg, #000, #333);
+      color: white;
+    }
 
-    async function cargarProductos() {
-      let productos = [];
-      let page = 1;
-      let seguir = true;
+    .card {
+      border: none;
+      background-color: #fff;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
 
-      while (seguir) {
-        try {
-          const res = await fetch(`https://snkrsmayoreo.mx/collections/modelos-disponibles-1/products.json?limit=250&page=${page}`);
-          const data = await res.json();
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
 
-          if (!data.products || data.products.length === 0) {
+    .card-img-container {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background-color: #fff;
+    }
+
+    .card-img-container img {
+      width: 100%;
+      display: block;
+      transition: opacity 0.4s ease;
+      object-fit: contain;
+      background-color: #fff;
+    }
+
+    .card-img-container img.hover-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+    }
+
+    .card-img-container:hover img.hover-img {
+      opacity: 1;
+    }
+
+    .card-body {
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .card-price {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 0.3rem;
+    }
+
+    .card-sizes {
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    footer {
+      background: #000;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="text-center py-4">
+    <h1 class="fw-bold mb-0">Catálogo de Tenis</h1>
+  </header>
+
+  <main class="container my-5">
+    <div id="lista-productos" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4"></div>
+  </main>
+
+  <footer class="text-center py-4">
+    © 2025 | Catálogo de Tenis
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const contenedor = document.getElementById("lista-productos");
+
+      // Función que define el margen de ganancia
+      const MARGEN_PRODUCTO = (title) => {
+        const t = title.toLowerCase();
+        if (t.includes("premium") || t.includes("retro") || t.includes("limited")) return 0.50;
+        if (t.includes("air") || t.includes("max") || t.includes("force")) return 0.40;
+        return 0.35;
+      };
+
+      // ✅ NUEVA FUNCIÓN: CARGA TODAS LAS PÁGINAS DE PRODUCTOS
+      async function cargarProductos() {
+        let productos = [];
+        let page = 1;
+        let seguir = true;
+
+        while (seguir) {
+          const url = `https://snkrsmayoreo.mx/collections/modelos-disponibles-1/products.json?limit=250&page=${page}`;
+          console.log("Cargando página:", page);
+          try {
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (!data.products || data.products.length === 0) {
+              seguir = false;
+              break;
+            }
+
+            const nuevos = data.products.map(p => {
+              const costo = p.variants[0]?.price ? parseFloat(p.variants[0].price) : 0;
+              const margen = MARGEN_PRODUCTO(p.title);
+              const precioFinal = (costo / (1 - margen)).toFixed(2);
+
+              const tallas = p.variants
+                .filter(v => v.available)
+                .map(v => v.title)
+                .join(", ");
+
+              return {
+                title: p.title,
+                image: p.images[0]?.src || "https://via.placeholder.com/300?text=Sin+Imagen",
+                imageHover: p.images[1]?.src || p.images[0]?.src,
+                precio: precioFinal,
+                tallas: tallas || "Sin tallas disponibles"
+              };
+            });
+
+            productos = productos.concat(nuevos);
+            page++;
+          } catch (err) {
+            console.error("Error cargando página", page, ":", err);
             seguir = false;
-            break;
           }
-
-          const nuevos = data.products.map(p => {
-            const costo = p.variants[0]?.price ? parseFloat(p.variants[0].price) : 0;
-            const margen = MARGEN_PRODUCTO(p.title);
-            const precioFinal = (costo / (1 - margen)).toFixed(2);
-
-            const tallas = p.variants
-              .filter(v => v.available)
-              .map(v => v.title)
-              .join(", ");
-
-            return {
-              title: p.title,
-              image: p.images[0]?.src || "https://via.placeholder.com/300?text=Sin+Imagen",
-              imageHover: p.images[1]?.src || p.images[0]?.src,
-              precio: precioFinal,
-              tallas: tallas || "Sin tallas disponibles"
-            };
-          });
-
-          productos = productos.concat(nuevos);
-          page++;
-        } catch (err) {
-          console.error("Error cargando productos:", err);
-          seguir = false;
         }
+
+        mostrarProductos(productos);
       }
 
-      if (productos.length === 0) {
-        contenedor.innerHTML = "<p class='text-danger'>No se pudieron cargar los productos.</p>";
-        return;
+      // Función que pinta las tarjetas
+      function mostrarProductos(lista) {
+        contenedor.innerHTML = "";
+        lista.forEach(prod => {
+          const col = document.createElement("div");
+          col.classList.add("col");
+
+          col.innerHTML = `
+            <div class="card h-100">
+              <div class="card-img-container">
+                <img src="${prod.image}" alt="${prod.title}" class="main-img">
+                <img src="${prod.imageHover}" alt="${prod.title}" class="hover-img">
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">${prod.title}</h5>
+                <div class="card-price">$${prod.precio} MXN</div>
+                <div class="card-sizes">Tallas: ${prod.tallas}</div>
+              </div>
+            </div>
+          `;
+          contenedor.appendChild(col);
+        });
       }
 
-      mostrarProductos(productos);
-    }
-
-    function mostrarProductos(lista) {
-      contenedor.innerHTML = "";
-      lista.forEach(prod => {
-        const col = document.createElement("div");
-        col.classList.add("col");
-
-        col.innerHTML = `
-          <div class="card h-100">
-            <div class="card-img-container">
-              <img src="${prod.image}" alt="${prod.title}" class="main-img">
-              <img src="${prod.imageHover}" alt="${prod.title}" class="hover-img">
-            </div>
-            <div class="card-body">
-              <h5 class="card-title">${prod.title}</h5>
-              <div class="card-price">$${prod.precio} MXN</div>
-              <div class="card-sizes">Tallas: ${prod.tallas}</div>
-            </div>
-          </div>
-        `;
-        contenedor.appendChild(col);
-      });
-    }
-
-    // Cargar productos automáticamente
-    cargarProductos();
-  });
-</script>
+      cargarProductos();
+    });
+  </script>
+</body>
+</html>
