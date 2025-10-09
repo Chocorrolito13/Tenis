@@ -12,7 +12,7 @@
     }
 
     header {
-      background: linear-gradient(90deg, #000, #444);
+      background: linear-gradient(90deg, #000, #333);
       color: white;
     }
 
@@ -90,7 +90,6 @@
 
   <header class="text-center py-4">
     <h1 class="fw-bold mb-0">Catálogo de Tenis</h1>
-    <p class="mb-0">Modelos disponibles</p>
   </header>
 
   <main class="container my-5">
@@ -98,14 +97,14 @@
   </main>
 
   <footer class="text-center py-4">
-   Catálogo de Tenis
+    © 2025 | Catálogo de Tenis
   </footer>
 
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       const contenedor = document.getElementById("lista-productos");
 
-      // Margen de ganancia según tipo de tenis
+      // Margen de ganancia sugerido según tipo de tenis
       const MARGEN_PRODUCTO = (title) => {
         const t = title.toLowerCase();
         if (t.includes("premium") || t.includes("retro") || t.includes("limited")) return 0.50;
@@ -177,4 +176,3 @@
   </script>
 </body>
 </html>
-
