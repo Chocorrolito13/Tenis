@@ -11,8 +11,6 @@
       background: linear-gradient(135deg, #f8f9fa, #e8ecf2);
       font-family: "Poppins", sans-serif;
       color: #222;
-      margin: 0;
-      padding: 0;
     }
 
     header {
@@ -32,12 +30,6 @@
       letter-spacing: 1px;
     }
 
-    header p {
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
-
-    /* --- Sección de filtros --- */
     section.container {
       background: #fff;
       border-radius: 20px;
@@ -62,7 +54,14 @@
       border-color: #111;
     }
 
-    /* --- Cards --- */
+    .contador {
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #333;
+      margin: 1rem 0;
+    }
+
     .card {
       border: none;
       border-radius: 20px;
@@ -71,8 +70,6 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.12);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       cursor: pointer;
-      display: flex;
-      flex-direction: column;
       position: relative;
     }
 
@@ -92,29 +89,18 @@
       transform: scale(1.1);
     }
 
-    .card-body {
-      padding: 1rem;
-      text-align: center;
-      background: linear-gradient(to bottom, #fff, #f9f9f9);
-    }
-
-    .card-title {
+    .badge-importado {
+      background: linear-gradient(45deg, #b8860b, #daa520);
+      color: #fff;
       font-weight: 600;
-      font-size: 1rem;
-      color: #222;
-      min-height: 45px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
-    .card-price {
-      font-weight: 700;
-      color: #dc3545;
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .card-sizes {
-      font-size: 0.9rem;
-      color: #555;
+    .badge-calidad {
+      background: linear-gradient(45deg, #007bff, #00a2ff);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
     footer {
@@ -126,7 +112,6 @@
       margin-top: 3rem;
     }
 
-    /* --- Animación sutil al cargar --- */
     .fade-in {
       animation: fadeIn 0.6s ease-in-out;
     }
@@ -151,7 +136,8 @@
         <label for="filtroTipo" class="form-label">Tipo de Tenis</label>
         <select id="filtroTipo" class="form-select">
           <option value="todos">Todos</option>
-          <option value="originales">Originales</option>
+          <option value="originales">Originales (Importados)</option>
+          <option value="calidad">Calidad 1.1 / Premium / Réplica</option>
         </select>
       </div>
 
@@ -167,8 +153,13 @@
     </div>
   </section>
 
+  <!-- Contador -->
+  <div class="container">
+    <div id="contador" class="contador">Cargando productos...</div>
+  </div>
+
   <!-- Catálogo -->
-  <main class="container my-5">
+  <main class="container my-4">
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="lista-productos"></div>
   </main>
 
@@ -182,6 +173,7 @@
       const contenedor = document.getElementById("lista-productos");
       const filtroTipo = document.getElementById("filtroTipo");
       const filtroPrecio = document.getElementById("filtroPrecio");
+      const contador = document.getElementById("contador");
       let productos = [];
 
       const MARGEN_PRODUCTO = (title) => {
@@ -215,7 +207,6 @@
               const costo = p.variants[0]?.price ? parseFloat(p.variants[0].price) : 0;
               const margen = MARGEN_PRODUCTO(p.title);
               const precioFinal = Math.round(costo / (1 - margen));
-
               const tallas = p.variants.filter(v => v.available).map(v => v.title).join(", ");
 
               return {
@@ -244,12 +235,28 @@
 
       function mostrarProductos(lista) {
         contenedor.innerHTML = "";
+        contador.textContent = lista.length > 0
+          ? `Mostrando ${lista.length} producto${lista.length > 1 ? 's' : ''}`
+          : "No se encontraron productos.";
+
         lista.forEach(prod => {
           const col = document.createElement("div");
           col.classList.add("col", "fade-in");
 
+          const t = prod.rawTitle.toLowerCase();
+          const esImportado = /importado|importación/.test(t);
+          const esCalidad = /(calidad\s*1\.?1|premium|copy|réplica|replica|versión|version)/.test(t);
+
+          let badgeHTML = "";
+          if (esImportado) {
+            badgeHTML = `<span class="badge badge-importado position-absolute top-0 start-0 m-2 px-3 py-2 rounded-3">Importado</span>`;
+          } else if (esCalidad) {
+            badgeHTML = `<span class="badge badge-calidad position-absolute top-0 start-0 m-2 px-3 py-2 rounded-3">Calidad 1.1</span>`;
+          }
+
           col.innerHTML = `
-            <div class="card h-100">
+            <div class="card h-100 position-relative">
+              ${badgeHTML}
               <img data-src="${prod.image}" data-hover="${prod.imageHover || prod.image}" alt="${prod.title}" class="card-img-top lazy">
               <div class="card-body">
                 <h5 class="card-title">${prod.title}</h5>
@@ -293,12 +300,20 @@
 
       function filtrarProductos() {
         let filtrados = [...productos];
+        const tipo = filtroTipo.value;
 
-        if (filtroTipo.value === "originales") {
-          filtrados = filtrados.filter(p =>
-            p.rawTitle.toLowerCase().includes("original") ||
-            p.rawTitle.toLowerCase().includes("importado") ||
-            p.rawTitle.toLowerCase().includes("premium")
+        if (tipo === "originales") {
+          filtrados = filtrados.filter(p => {
+            const t = p.rawTitle.toLowerCase();
+            return (t.includes("importado") || t.includes("importación")) &&
+                   !t.includes("calidad") && !t.includes("1.1") &&
+                   !t.includes("replica") && !t.includes("copy");
+          });
+        }
+
+        if (tipo === "calidad") {
+          filtrados = filtrados.filter(p => 
+            /(calidad\s*1\.?1|premium|copy|réplica|replica|versión|version)/.test(p.rawTitle.toLowerCase())
           );
         }
 
