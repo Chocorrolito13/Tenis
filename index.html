@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>LEGACY Sneakers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="legacy-header">
+  <h1>👟 LEGACY SNEAKERS</h1>
+  <p>Catálogo exclusivo · Original & G5</p>
+</header>
+
+<!-- LOADER -->
+<div id="legacy-loader" class="legacy-loader">
+  <div class="spinner-border text-dark"></div>
+</div>
+
+<!-- FILTRO VISUAL -->
+<section class="container legacy-filtros text-center">
+  <button id="btnTodos" class="btn btn-dark active">Todos</button>
+  <button id="btnOriginal" class="btn btn-outline-dark">Original</button>
+  <button id="btnG5" class="btn btn-outline-dark">G5</button>
+</section>
+
+<!-- PRODUCTOS -->
+<main class="container my-4">
+  <div id="lista-productos" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4"></div>
+</main>
+
+<!-- PAGINACIÓN -->
+<div id="paginacion" class="container my-4 text-center"></div>
+
+<!-- MODAL -->
+<div class="modal fade" id="productoModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+
+        <h5 id="modalTitulo"></h5>
+        <img id="modalImg" class="img-fluid mb-3">
+
+        <div id="modalGaleria" class="d-flex gap-2 mb-3"></div>
+
+        <p id="modalPrecio" class="fw-bold"></p>
+        <p>Tallas: <span id="modalTallas"></span></p>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="legacy-footer">
+  © 2025 LEGACY · Sneakers Premium
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
