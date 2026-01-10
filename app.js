@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnTodos = document.getElementById("btnTodos");
   const btnOriginal = document.getElementById("btnOriginal");
   const btnG5 = document.getElementById("btnG5");
+  const btnOtros = document.getElementById("btnOtros");
 
   let productos = [];
   let productosFiltrados = [];
@@ -74,21 +75,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const tituloLower = p.title.toLowerCase();
 
-        // ❌ Excluir pacas / paquetes
         if (/paca|paquete|pack|docena|mayoreo/.test(tituloLower)) return;
 
-        // ✔ ORIGINAL
-        const esOriginal = /importado|original/.test(tituloLower);
-
-        // ✔ G5 + CALIDAD
+        const esImportado = /importado|original/.test(tituloLower);
         const esG5 = /g5|5g|1\.1|calidad|premium|replica|réplica|copy|version|versión|top quality/.test(tituloLower);
 
-        if (!esOriginal && !esG5) return;
+        let tipo = "otro";
+        if (esImportado) tipo = "original";
+        else if (esG5) tipo = "g5";
 
         productos.push({
           id: p.id,
           titulo: limpiarTitulo(p.title),
-          tipo: esOriginal ? "original" : "g5",
+          tipo: tipo,
           imagenes: p.images.map(img => img.src),
           precio: calcularPrecio(parseFloat(p.variants[0]?.price || 0)),
           tallas: p.variants.filter(v => v.available).map(v => v.title).join(", ")
@@ -98,7 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
       sinceId = data.products[data.products.length - 1].id;
     }
 
-    // ORIGINAL primero
     productos.sort((a, b) => a.tipo === "original" ? -1 : 1);
 
     aplicarFiltro();
@@ -117,8 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
       contenedor.innerHTML += `
         <div class="col fade-in">
           <div class="card producto" data-producto='${JSON.stringify(p)}'>
-            <span class="badge ${p.tipo === "original" ? "badge-importado" : "badge-calidad"} position-absolute m-2">
-              ${p.tipo === "original" ? "ORIGINAL" : "G5"}
+            <span class="badge ${
+              p.tipo === "original" ? "badge-importado" :
+              p.tipo === "g5" ? "badge-calidad" :
+              "bg-secondary"
+            } position-absolute m-2">
+              ${p.tipo === "original" ? "IMPORTADO" : p.tipo === "g5" ? "G5" : "OTRO"}
             </span>
             <img src="${p.imagenes[0]}" class="card-img-top">
             <div class="card-body">
@@ -139,15 +141,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalPaginas = Math.ceil(productosFiltrados.length / POR_PAGINA);
     if (totalPaginas <= 1) return;
 
-    const rango = 2;
-    let inicio = Math.max(1, pagina - rango);
-    let fin = Math.min(totalPaginas, pagina + rango);
-
     if (pagina > 1) {
       paginacion.innerHTML += `<button class="btn btn-outline-dark m-1" onclick="cambiarPagina(${pagina - 1})">«</button>`;
     }
 
-    for (let i = inicio; i <= fin; i++) {
+    for (let i = 1; i <= totalPaginas; i++) {
       paginacion.innerHTML += `
         <button class="btn ${i === pagina ? "btn-dark" : "btn-outline-dark"} m-1"
         onclick="cambiarPagina(${i})">${i}</button>`;
@@ -215,8 +213,15 @@ document.addEventListener("DOMContentLoaded", () => {
     aplicarFiltro();
   };
 
+  btnOtros.onclick = () => {
+    filtroActivo = "otro";
+    pagina = 1;
+    activarBoton(btnOtros);
+    aplicarFiltro();
+  };
+
   function activarBoton(btn) {
-    [btnTodos, btnOriginal, btnG5].forEach(b => b.classList.remove("active"));
+    [btnTodos, btnOriginal, btnG5, btnOtros].forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
   }
 
