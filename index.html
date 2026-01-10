@@ -27,11 +27,14 @@
   <div class="spinner-border text-dark"></div>
 </div>
 
+
+
 <!-- FILTRO VISUAL -->
 <section class="container legacy-filtros text-center">
   <button id="btnTodos" class="btn btn-dark active">Todos</button>
-  <button id="btnOriginal" class="btn btn-outline-dark">Original</button>
+  <button id="btnOriginal" class="btn btn-outline-dark">Importados</button>
   <button id="btnG5" class="btn btn-outline-dark">G5</button>
+  <button id="btnOtros" class="btn btn-outline-dark">Otros</button>
 </section>
 
 <!-- PRODUCTOS -->
@@ -46,20 +49,25 @@
 <div class="modal fade" id="productoModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-body">
 
-        <h5 id="modalTitulo"></h5>
+      <div class="modal-header">
+        <h5 id="modalTitulo" class="modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
         <img id="modalImg" class="img-fluid mb-3">
 
         <div id="modalGaleria" class="d-flex gap-2 mb-3"></div>
 
         <p id="modalPrecio" class="fw-bold"></p>
         <p>Tallas: <span id="modalTallas"></span></p>
-
       </div>
+
     </div>
   </div>
 </div>
+
 
 <footer class="legacy-footer">
   © 2025 LEGACY · Sneakers Premium
